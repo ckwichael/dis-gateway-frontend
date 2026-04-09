@@ -56,6 +56,12 @@
   padding: 22px 24px 28px;
 }
 
+.ruleset-dialog {
+  background: #26282d;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+}
+
 @media (max-width: 1200px) {
   .inspector-drawer__content {
     padding: 20px 20px 28px;

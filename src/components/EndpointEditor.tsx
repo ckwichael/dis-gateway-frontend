@@ -1,9 +1,14 @@
 import { Button, MenuItem, Stack, TextField, Typography } from '@mui/material'
-import type { GatewayInput, GatewayOutput } from '../../shared/models/gateway.ts'
+import type {
+  GatewayInput,
+  GatewayOutput,
+  NetworkInterfaceOption,
+} from '../../shared/models/gateway.ts'
 
 type EndpointEditorProps = {
   title: string
   endpoint: GatewayInput | GatewayOutput
+  interfaceOptions?: NetworkInterfaceOption[]
   showInterface?: boolean
   onChange: (next: GatewayInput | GatewayOutput) => void
   onSave: () => void
@@ -13,12 +18,25 @@ type EndpointEditorProps = {
 export function EndpointEditor({
   title,
   endpoint,
+  interfaceOptions = [],
   showInterface = false,
   onChange,
   onSave,
   onDelete,
 }: EndpointEditorProps) {
   const endpointInterface = 'interface' in endpoint ? endpoint.interface : '0.0.0.0'
+  const dropdownInterfaceOptions = interfaceOptions.some(
+    (option) => option.address === endpointInterface,
+  )
+    ? interfaceOptions
+    : [
+        ...interfaceOptions,
+        {
+          id: `nic-current-${endpointInterface}`,
+          name: endpointInterface,
+          address: endpointInterface,
+        },
+      ]
 
   return (
     <Stack spacing={2}>
@@ -54,12 +72,19 @@ export function EndpointEditor({
       </TextField>
       {showInterface && (
         <TextField
+          select
           label="Interface"
           value={endpointInterface}
           onChange={(event) =>
             onChange({ ...endpoint, interface: event.target.value } as GatewayInput | GatewayOutput)
           }
-        />
+        >
+          {dropdownInterfaceOptions.map((option) => (
+            <MenuItem key={option.id} value={option.address}>
+              {option.name} ({option.address})
+            </MenuItem>
+          ))}
+        </TextField>
       )}
       <TextField
         label="Description"

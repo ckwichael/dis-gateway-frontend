@@ -1,5 +1,6 @@
 import type {
   GatewayInput,
+  NetworkInterfaceOption,
   GatewayOutput,
   GatewayRoute,
   GatewayWorkspace,
@@ -30,6 +31,9 @@ async function request<T>(path: string, init?: RequestInit) {
 export const gatewayApi = {
   getWorkspace() {
     return request<GatewayWorkspace>('/workspace').then(normalizeWorkspace)
+  },
+  getInterfaces() {
+    return request<NetworkInterfaceOption[]>('/interfaces')
   },
   createInput(input: Partial<GatewayInput>) {
     return request<MutationResponse<GatewayInput>>('/inputs', {

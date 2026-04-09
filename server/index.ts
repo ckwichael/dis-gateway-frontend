@@ -8,6 +8,7 @@ import {
   createSeedWorkspace,
   touchWorkspace,
   type GatewayInput,
+  type NetworkInterfaceOption,
   type GatewayOutput,
   type GatewayRoute,
   type GatewayWorkspace,
@@ -17,6 +18,32 @@ import {
 
 const port = Number(process.env.PORT ?? 4010)
 let workspace = createSeedWorkspace()
+const availableInterfaces: NetworkInterfaceOption[] = [
+  {
+    id: 'nic-any',
+    name: 'Any Interface',
+    address: '0.0.0.0',
+    description: 'Bind on all available IPv4 interfaces.',
+  },
+  {
+    id: 'nic-lan-a',
+    name: 'LAN A',
+    address: '192.168.12.40',
+    description: 'Primary simulation network adapter.',
+  },
+  {
+    id: 'nic-lan-b',
+    name: 'LAN B',
+    address: '10.0.0.15',
+    description: 'Secondary operations network adapter.',
+  },
+  {
+    id: 'nic-loopback',
+    name: 'Loopback',
+    address: '127.0.0.1',
+    description: 'Local test and development traffic.',
+  },
+]
 
 function sendJson(
   response: import('node:http').ServerResponse,
@@ -101,6 +128,11 @@ createServer(async (request, response) => {
 
     if (request.method === 'GET' && path === '/api/workspace') {
       sendJson(response, 200, workspace)
+      return
+    }
+
+    if (request.method === 'GET' && path === '/api/interfaces') {
+      sendJson(response, 200, availableInterfaces)
       return
     }
 

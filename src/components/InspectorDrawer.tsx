@@ -13,6 +13,7 @@ import {
 } from '@mui/material'
 import type {
   GatewayInput,
+  NetworkInterfaceOption,
   GatewayOutput,
   GatewayRoute,
   GatewayWorkspace,
@@ -24,6 +25,7 @@ type InspectorDrawerProps = {
   inputDraft: GatewayInput | null
   outputDraft: GatewayOutput | null
   routeDraft: GatewayRoute | null
+  interfaceOptions: NetworkInterfaceOption[]
   workspace: GatewayWorkspace | null
   onClose: () => void
   onInputChange: (next: GatewayInput) => void
@@ -43,6 +45,7 @@ export function InspectorDrawer({
   inputDraft,
   outputDraft,
   routeDraft,
+  interfaceOptions,
   workspace,
   onClose,
   onInputChange,
@@ -89,6 +92,7 @@ export function InspectorDrawer({
           <EndpointEditor
             title="Input Definition"
             endpoint={inputDraft}
+            interfaceOptions={interfaceOptions}
             showInterface
             onChange={(next) => onInputChange(next as GatewayInput)}
             onSave={onSaveInput}
@@ -100,6 +104,7 @@ export function InspectorDrawer({
           <EndpointEditor
             title="Output Definition"
             endpoint={outputDraft}
+            interfaceOptions={interfaceOptions}
             showInterface
             onChange={(next) => onOutputChange(next as GatewayOutput)}
             onSave={onSaveOutput}

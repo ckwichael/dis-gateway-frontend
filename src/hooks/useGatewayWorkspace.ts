@@ -1,6 +1,7 @@
 import { startTransition, useEffect, useState } from 'react'
 import type {
   GatewayInput,
+  NetworkInterfaceOption,
   GatewayOutput,
   GatewayRoute,
   GatewayWorkspace,
@@ -10,6 +11,7 @@ import { gatewayApi } from '../api/client.ts'
 
 export function useGatewayWorkspace() {
   const [workspace, setWorkspace] = useState<GatewayWorkspace | null>(null)
+  const [interfaceOptions, setInterfaceOptions] = useState<NetworkInterfaceOption[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -23,9 +25,13 @@ export function useGatewayWorkspace() {
     setError(null)
 
     try {
-      const next = await gatewayApi.getWorkspace()
+      const [nextWorkspace, nextInterfaces] = await Promise.all([
+        gatewayApi.getWorkspace(),
+        gatewayApi.getInterfaces(),
+      ])
       startTransition(() => {
-        setWorkspace(next)
+        setWorkspace(nextWorkspace)
+        setInterfaceOptions(nextInterfaces)
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load workspace.')
@@ -54,6 +60,7 @@ export function useGatewayWorkspace() {
 
   return {
     workspace,
+    interfaceOptions,
     loading,
     saving,
     error,

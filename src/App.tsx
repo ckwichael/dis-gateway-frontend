@@ -220,6 +220,7 @@ function App() {
             inputDraft={inputDraft}
             outputDraft={outputDraft}
             routeDraft={routeDraft}
+            interfaceOptions={api.interfaceOptions}
             workspace={api.workspace}
             onClose={() => setSelection(null)}
             onInputChange={setInputDraft}

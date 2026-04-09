@@ -43,7 +43,7 @@ export interface EntityStateReplacementRule {
   id: string
   name: string
   enabled: boolean
-  match: MatchGroup
+  match: MatchGroup | null
   replacements: BuilderReplacement[]
 }
 
@@ -74,6 +74,13 @@ export interface GatewayOutput {
   interface: string
   ttl: number
   description: string
+}
+
+export interface NetworkInterfaceOption {
+  id: string
+  name: string
+  address: string
+  description?: string
 }
 
 export interface RuleSetDefinition {
@@ -186,7 +193,7 @@ export function buildRulePreview(builder?: EntityStateRuleBuilder): string {
     enabled: rule.enabled,
     action: 'replace',
     pdu_type: 'EntityState',
-    match: serializeMatchGroup(rule.match),
+    ...(rule.match ? { match: serializeMatchGroup(rule.match) } : {}),
     replacements: rule.replacements.map((replacement) => ({
       field: replacement.field,
       value: replacement.value,
@@ -238,9 +245,9 @@ export function normalizeRuleSet(ruleSet: RuleSetDefinition): RuleSetDefinition 
   }
 }
 
-function normalizeMatchGroup(group: MatchGroup | undefined): MatchGroup {
+function normalizeMatchGroup(group: MatchGroup | null | undefined): MatchGroup | null {
   if (!group) {
-    return createDefaultMatchGroup()
+    return null
   }
 
   return {
@@ -249,15 +256,17 @@ function normalizeMatchGroup(group: MatchGroup | undefined): MatchGroup {
     operator: group.operator ?? 'AND',
     children:
       group.children?.length > 0
-        ? group.children.map((child) =>
-            child.type === 'group'
-              ? normalizeMatchGroup(child)
-              : {
-                  ...child,
-                  type: 'condition',
-                },
-          )
-        : [createDefaultCondition()],
+        ? group.children
+            .map((child) =>
+              child.type === 'group'
+                ? normalizeMatchGroup(child)
+                : {
+                    ...child,
+                    type: 'condition' as const,
+                  },
+            )
+            .filter((child): child is MatchNode => child != null)
+        : [],
   }
 }
 

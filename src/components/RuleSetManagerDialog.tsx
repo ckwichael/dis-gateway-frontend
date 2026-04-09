@@ -62,7 +62,13 @@ export function RuleSetManagerDialog({
   }, [selectedRuleSet])
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="lg"
+      fullWidth
+      slotProps={{ paper: { className: 'ruleset-dialog' } }}
+    >
       <DialogTitle>Rule Set Builder</DialogTitle>
       <DialogContent dividers>
         <Box sx={{ display: 'grid', gridTemplateColumns: '280px minmax(0, 1fr)', gap: 3 }}>
@@ -74,7 +80,14 @@ export function RuleSetManagerDialog({
               <Paper
                 key={ruleSet.id}
                 variant={ruleSet.id === draft?.id ? 'elevation' : 'outlined'}
-                sx={{ p: 1.5, borderRadius: 2, cursor: 'pointer' }}
+                sx={{
+                  p: 1.5,
+                  borderRadius: 2,
+                  cursor: 'pointer',
+                  backgroundColor: ruleSet.id === draft?.id ? '#35333b' : '#2d2f34',
+                  borderColor: ruleSet.id === draft?.id ? 'rgba(110, 74, 134, 0.45)' : 'rgba(255, 255, 255, 0.06)',
+                  boxShadow: 'none',
+                }}
                 onClick={() => onSelectRuleSet(ruleSet.id)}
               >
                 <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
@@ -132,15 +145,10 @@ export function RuleSetManagerDialog({
                       setDraft(
                         updateRuleSetRule(draft, rule.id, {
                           ...rule,
-                          match: appendMatchNode(rule.match, createDefaultCondition()),
-                        }),
-                      )
-                    }
-                    onAddGroup={() =>
-                      setDraft(
-                        updateRuleSetRule(draft, rule.id, {
-                          ...rule,
-                          match: appendMatchNode(rule.match, createDefaultMatchGroup('AND')),
+                          match: appendMatchNode(
+                            rule.match ?? createDefaultMatchGroup('AND', []),
+                            createDefaultCondition(),
+                          ),
                         }),
                       )
                     }
@@ -209,7 +217,6 @@ type RuleCardProps = {
   onChange: (rule: EntityStateReplacementRule) => void
   onDelete: () => void
   onAddCondition: () => void
-  onAddGroup: () => void
   onAddReplacement: () => void
 }
 
@@ -219,11 +226,19 @@ function RuleCard({
   onChange,
   onDelete,
   onAddCondition,
-  onAddGroup,
   onAddReplacement,
 }: RuleCardProps) {
   return (
-    <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 2,
+        borderRadius: 2,
+        backgroundColor: '#2f3136',
+        borderColor: 'rgba(255, 255, 255, 0.06)',
+        boxShadow: 'none',
+      }}
+    >
       <Stack spacing={2}>
         <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography sx={{ fontWeight: 700 }}>Rule {index + 1}</Typography>
@@ -250,20 +265,37 @@ function RuleCard({
         </Stack>
 
         <Typography variant="subtitle2">Match expression</Typography>
-        <MatchGroupEditor
-          group={rule.match}
-          depth={0}
-          isRoot
-          onChange={(nextMatch) => onChange({ ...rule, match: nextMatch })}
-        />
-        <Stack direction="row" spacing={1}>
-          <Button color="inherit" size="small" onClick={onAddCondition}>
-            Add Condition To Root
-          </Button>
-          <Button color="inherit" size="small" onClick={onAddGroup}>
-            Add Group To Root
-          </Button>
-        </Stack>
+        {rule.match ? (
+          <MatchGroupEditor
+            group={rule.match}
+            depth={0}
+            isRoot
+            onChange={(nextMatch) => onChange({ ...rule, match: nextMatch })}
+            onDelete={() => onChange({ ...rule, match: null })}
+          />
+        ) : (
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 1.5,
+              borderRadius: 2,
+              borderColor: 'rgba(255, 255, 255, 0.06)',
+              backgroundColor: '#303238',
+              boxShadow: 'none',
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              No match conditions. This rule will always apply its replacements.
+            </Typography>
+          </Paper>
+        )}
+        {!rule.match && (
+          <Stack direction="row" spacing={1}>
+            <Button color="inherit" size="small" onClick={onAddCondition}>
+              Add Condition Group
+            </Button>
+          </Stack>
+        )}
 
         <Typography variant="subtitle2">Apply these replacements</Typography>
         <Stack spacing={1}>
@@ -313,8 +345,9 @@ function MatchGroupEditor({
       sx={{
         p: 1.5,
         borderRadius: 2,
-        borderColor: depth === 0 ? 'rgba(15,118,110,0.24)' : 'rgba(20,33,61,0.12)',
-        backgroundColor: depth === 0 ? 'rgba(15,118,110,0.04)' : 'rgba(255,255,255,0.5)',
+        borderColor: depth === 0 ? 'rgba(110, 74, 134, 0.3)' : 'rgba(255, 255, 255, 0.06)',
+        backgroundColor: depth === 0 ? '#34323a' : '#303238',
+        boxShadow: 'none',
       }}
     >
       <Stack spacing={1.5}>
@@ -334,31 +367,37 @@ function MatchGroupEditor({
               <MenuItem value="OR">OR</MenuItem>
             </TextField>
           </Stack>
-          {!isRoot && (
+          {onDelete && (
             <Button color="inherit" size="small" onClick={onDelete}>
-              Remove Group
+              Delete Group
             </Button>
           )}
         </Stack>
 
         <Stack spacing={1}>
-          {group.children.map((child) =>
-            child.type === 'condition' ? (
-              <ConditionRow
-                key={child.id}
-                condition={child}
-                onChange={(next) => onChange(replaceMatchNode(group, child.id, next))}
-                onDelete={() => onChange(removeMatchNode(group, child.id))}
-              />
-            ) : (
-              <MatchGroupEditor
-                key={child.id}
-                group={child}
-                depth={depth + 1}
-                onChange={(nextGroup) => onChange(replaceMatchNode(group, child.id, nextGroup))}
-                onDelete={() => onChange(removeMatchNode(group, child.id))}
-              />
-            ),
+          {group.children.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              No conditions in this group yet.
+            </Typography>
+          ) : (
+            group.children.map((child) =>
+              child.type === 'condition' ? (
+                <ConditionRow
+                  key={child.id}
+                  condition={child}
+                  onChange={(next) => onChange(replaceMatchNode(group, child.id, next))}
+                  onDelete={() => onChange(removeMatchNode(group, child.id))}
+                />
+              ) : (
+                <MatchGroupEditor
+                  key={child.id}
+                  group={child}
+                  depth={depth + 1}
+                  onChange={(nextGroup) => onChange(replaceMatchNode(group, child.id, nextGroup))}
+                  onDelete={() => onChange(removeMatchNode(group, child.id))}
+                />
+              ),
+            )
           )}
         </Stack>
 
@@ -520,6 +559,6 @@ function removeMatchNode(group: MatchGroup, nodeId: string): MatchGroup {
 
   return {
     ...group,
-    children: nextChildren.length > 0 ? nextChildren : [createDefaultCondition()],
+    children: nextChildren,
   }
 }
