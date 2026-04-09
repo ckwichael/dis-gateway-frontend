@@ -1,0 +1,79 @@
+.app-shell {
+  min-height: 100vh;
+  padding: 20px 24px;
+  background: #1f2023;
+}
+
+.canvas-panel,
+.inspector-panel {
+  background: transparent;
+}
+
+.canvas-panel,
+.inspector-panel {
+  padding: 0;
+}
+
+.canvas-panel--full {
+  width: 100%;
+}
+
+.workspace-toolbar {
+  padding: 0 2px 16px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.canvas-shell {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  background: #2a2c31;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.endpoint-node {
+  position: relative;
+}
+
+.canvas-loading {
+  min-height: 420px;
+  display: grid;
+  place-items: center;
+}
+
+.inspector-drawer {
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  background: #26282d;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.inspector-drawer__content {
+  max-height: 72vh;
+  overflow: auto;
+  padding: 22px 24px 28px;
+}
+
+@media (max-width: 1200px) {
+  .inspector-drawer__content {
+    padding: 20px 20px 28px;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    padding: 16px;
+  }
+
+  .canvas-panel,
+  .inspector-panel {
+    border-radius: 14px;
+  }
+
+  .canvas-shell,
+  .canvas-loading {
+    min-height: 420px;
+  }
+}
