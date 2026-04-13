@@ -25,6 +25,9 @@ type WorkspaceCanvasProps = {
   onConnect: (connection: Connection) => void
   onNodeClick: (nodeId: string) => void
   onEdgeClick: (edgeId: string) => void
+  onEdgeMouseEnter: (edgeId: string) => void
+  onEdgeMouseLeave: () => void
+  onCanvasHoverExit: () => void
   onCreateInput: () => void
   onCreateOutput: () => void
   onOpenRuleSets: () => void
@@ -43,6 +46,9 @@ export function WorkspaceCanvas({
   onConnect,
   onNodeClick,
   onEdgeClick,
+  onEdgeMouseEnter,
+  onEdgeMouseLeave,
+  onCanvasHoverExit,
   onCreateInput,
   onCreateOutput,
   onOpenRuleSets,
@@ -95,7 +101,13 @@ export function WorkspaceCanvas({
             onConnect={onConnect}
             connectionLineType={ConnectionLineType.Straight}
             onNodeClick={(_, node) => onNodeClick(node.id)}
+            onNodeMouseEnter={onCanvasHoverExit}
             onEdgeClick={(_, edge) => onEdgeClick(edge.id)}
+            onEdgeMouseEnter={(_, edge) => onEdgeMouseEnter(edge.id)}
+            onEdgeMouseLeave={onEdgeMouseLeave}
+            onPaneMouseEnter={onCanvasHoverExit}
+            onPaneMouseLeave={onCanvasHoverExit}
+            onPaneClick={onCanvasHoverExit}
             defaultEdgeOptions={{ type: 'straight' }}
             nodesConnectable
             autoPanOnConnect={false}
@@ -111,7 +123,7 @@ export function WorkspaceCanvas({
             defaultViewport={{ x: 0, y: 0, zoom: 1 }}
             proOptions={{ hideAttribution: true }}
           >
-            <Background gap={20} size={1} color="rgba(15, 118, 110, 0.12)" />
+            <Background gap={32} size={1} color="rgba(255, 255, 255, 0.08)" />
           </ReactFlow>
         </Box>
       )}

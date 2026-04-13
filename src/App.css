@@ -28,13 +28,43 @@
   width: 100%;
   overflow: hidden;
   position: relative;
-  background: #2a2c31;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(0, 0, 0, 0.035)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.028) 0,
+      rgba(255, 255, 255, 0.028) 1px,
+      transparent 1px,
+      transparent 32px
+    ),
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.02) 0,
+      rgba(255, 255, 255, 0.02) 1px,
+      transparent 1px,
+      transparent 32px
+    ),
+    #2a2c31;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .endpoint-node {
   position: relative;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background-color 140ms ease,
+    transform 140ms ease;
+}
+
+.endpoint-node:hover {
+  border-color: rgba(110, 74, 134, 0.4);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+.endpoint-node:hover .react-flow__handle {
+  background: #8a67a3 !important;
 }
 
 .canvas-loading {

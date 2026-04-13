@@ -32,6 +32,7 @@ const endpointNodeWidth = 282
 function App() {
   const api = useGatewayWorkspace()
   const [selection, setSelection] = useState<Selection>(null)
+  const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
   const [inputDraft, setInputDraft] = useState<GatewayInput | null>(null)
   const [outputDraft, setOutputDraft] = useState<GatewayOutput | null>(null)
   const [routeDraft, setRouteDraft] = useState<GatewayRoute | null>(null)
@@ -141,14 +142,29 @@ function App() {
       animated: false,
       type: 'straight',
       style: {
-        stroke: selection?.kind === 'route' && selection.id === route.id ? '#8a67a3' : '#6e4a86',
-        strokeWidth: selection?.kind === 'route' && selection.id === route.id ? 4 : 2.5,
+        stroke:
+          selection?.kind === 'route' && selection.id === route.id
+            ? '#9b76b5'
+            : hoveredEdgeId === route.id
+              ? '#8a67a3'
+              : '#6e4a86',
+        strokeWidth:
+          selection?.kind === 'route' && selection.id === route.id
+            ? 4
+            : hoveredEdgeId === route.id
+              ? 3.25
+              : 2.5,
         strokeDasharray: route.enabled ? undefined : '8 6',
-        opacity: route.enabled ? 1 : 0.7,
+        opacity: hoveredEdgeId === route.id ? 1 : route.enabled ? 1 : 0.7,
       },
       markerEnd: {
         type: MarkerType.ArrowClosed,
-        color: selection?.kind === 'route' && selection.id === route.id ? '#8a67a3' : '#6e4a86',
+        color:
+          selection?.kind === 'route' && selection.id === route.id
+            ? '#9b76b5'
+            : hoveredEdgeId === route.id
+              ? '#8a67a3'
+              : '#6e4a86',
       },
     })) ?? []
 
@@ -196,10 +212,17 @@ function App() {
             nodeTypes={nodeTypes}
             onConnect={onConnect}
             onNodeClick={(nodeId) => {
+              setHoveredEdgeId(null)
               const isInput = api.workspace?.inputs.some((input) => input.id === nodeId)
               setSelection({ kind: isInput ? 'input' : 'output', id: nodeId })
             }}
-            onEdgeClick={(edgeId) => setSelection({ kind: 'route', id: edgeId })}
+            onEdgeClick={(edgeId) => {
+              setHoveredEdgeId(edgeId)
+              setSelection({ kind: 'route', id: edgeId })
+            }}
+            onEdgeMouseEnter={(edgeId) => setHoveredEdgeId(edgeId)}
+            onEdgeMouseLeave={() => setHoveredEdgeId(null)}
+            onCanvasHoverExit={() => setHoveredEdgeId(null)}
             onCreateInput={async () => {
               const created = await api.createInput(createDefaultInput())
               if (created) {
