@@ -1,0 +1,9 @@
+node_modules
+dist
+dist-electron
+dist-server
+release
+release-linux
+.git
+node_modules.rar
+node_modules.zip

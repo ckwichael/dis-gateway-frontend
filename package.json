@@ -2,11 +2,18 @@
   "name": "dis-gateway-frontend",
   "private": true,
   "version": "0.0.0",
+  "main": "dist-electron/main.js",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "api:build": "tsc -p tsconfig.server.runtime.json",
-    "api:dev": "npm.cmd run api:build && node dist-server/server/index.js",
+    "api:dev": "npm run api:build && node dist-server/server/index.js",
+    "electron:build": "tsc -p tsconfig.electron.json",
+    "desktop:build": "npm run build && npm run api:build && npm run electron:build",
+    "desktop:start": "npm run desktop:build && electron dist-electron/main.js",
+    "dist:win": "npm run desktop:build && electron-builder --win portable nsis",
+    "dist:linux:appimage": "npm run desktop:build && electron-builder --linux AppImage",
+    "dist:linux": "npm run desktop:build && electron-builder --linux AppImage tar.gz",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -26,6 +33,8 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "electron": "^41.2.1",
+    "electron-builder": "^26.8.1",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
@@ -34,5 +43,32 @@
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.0",
     "vite": "^8.0.4"
+  },
+  "build": {
+    "appId": "com.disgateway.frontend",
+    "productName": "DIS Gateway",
+    "files": [
+      "dist/**/*",
+      "dist-server/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "asar": true,
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "tar.gz"
+      ],
+      "category": "Utility"
+    }
   }
 }

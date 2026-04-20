@@ -9,7 +9,20 @@ import type {
 } from '../../shared/models/gateway.ts'
 import { normalizeWorkspace } from '../../shared/models/gateway.ts'
 
-const apiBase = '/api'
+function resolveApiBase() {
+  const desktopApiBase = window.disGatewayDesktop?.apiBase
+  if (desktopApiBase) {
+    return desktopApiBase
+  }
+
+  if (window.location.protocol === 'file:') {
+    return 'http://127.0.0.1:4010/api'
+  }
+
+  return '/api'
+}
+
+const apiBase = resolveApiBase()
 
 async function request<T>(path: string, init?: RequestInit) {
   const response = await fetch(`${apiBase}${path}`, {

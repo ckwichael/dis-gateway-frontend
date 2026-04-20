@@ -1,0 +1,28 @@
+FROM registry.access.redhat.com/ubi8/nodejs-20:latest AS builder
+
+USER root
+
+RUN dnf -y update \
+    && dnf -y install \
+        git \
+        findutils \
+        xz \
+        file \
+    && dnf clean all
+
+WORKDIR /workspace
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+
+RUN npm run dist:linux:appimage
+
+RUN mkdir -p /release-linux \
+    && find /workspace/release -maxdepth 1 -type f -name "*.AppImage" -exec cp {} /release-linux/ \; \
+    && find /workspace/release -maxdepth 1 -type f -name "*.blockmap" -exec cp {} /release-linux/ \;
+
+FROM scratch AS export
+
+COPY --from=builder /release-linux/ /release-linux/

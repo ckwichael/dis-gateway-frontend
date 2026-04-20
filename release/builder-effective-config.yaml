@@ -1,0 +1,22 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.disgateway.frontend
+productName: DIS Gateway
+files:
+  - filter:
+      - dist/**/*
+      - dist-server/**/*
+      - dist-electron/**/*
+      - package.json
+asar: true
+win:
+  target:
+    - portable
+    - nsis
+linux:
+  target:
+    - AppImage
+    - tar.gz
+  category: Utility
+electronVersion: 41.2.1

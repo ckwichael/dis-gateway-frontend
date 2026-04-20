@@ -55,7 +55,7 @@ export function buildRulePreview(builder) {
         enabled: rule.enabled,
         action: 'replace',
         pdu_type: 'EntityState',
-        match: serializeMatchGroup(rule.match),
+        ...(rule.match ? { match: serializeMatchGroup(rule.match) } : {}),
         replacements: rule.replacements.map((replacement) => ({
             field: replacement.field,
             value: replacement.value,
@@ -98,20 +98,22 @@ export function normalizeRuleSet(ruleSet) {
 }
 function normalizeMatchGroup(group) {
     if (!group) {
-        return createDefaultMatchGroup();
+        return null;
     }
     return {
         ...group,
         type: 'group',
         operator: group.operator ?? 'AND',
         children: group.children?.length > 0
-            ? group.children.map((child) => child.type === 'group'
+            ? group.children
+                .map((child) => child.type === 'group'
                 ? normalizeMatchGroup(child)
                 : {
                     ...child,
                     type: 'condition',
                 })
-            : [createDefaultCondition()],
+                .filter((child) => child != null)
+            : [],
     };
 }
 export function normalizeOutput(output) {

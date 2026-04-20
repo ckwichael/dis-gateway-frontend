@@ -1,73 +1,43 @@
-# React + TypeScript + Vite
+# DIS Gateway Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project includes:
 
-Currently, two official plugins are available:
+- a Vite/MUI React frontend
+- a mock local Node API used for UI design and contract shaping
+- an Electron desktop wrapper that starts the mock API locally and loads the built UI against it
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Web Scripts
 
-## React Compiler
+- `npm run dev`
+  Starts the Vite frontend in browser dev mode.
+- `npm run api:dev`
+  Builds and runs the mock API on `http://127.0.0.1:4010`.
+- `npm run build`
+  Builds the frontend bundle.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Desktop Scripts
 
-## Expanding the ESLint configuration
+- `npm run desktop:build`
+  Builds the frontend, mock API runtime, and Electron main/preload files.
+- `npm run desktop:start`
+  Builds everything and launches the Electron desktop app locally.
+- `npm run dist:win`
+  Creates Windows desktop distributables in `release/`.
+- `npm run dist:linux`
+  Creates Linux desktop distributables in `release/`.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Packaging Notes
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- The Electron app loads the frontend from the local `dist/` bundle and starts the mock API automatically inside the desktop runtime.
+- The renderer keeps using the same `/api`-shaped contract, so swapping the mock server for the real backend later stays straightforward.
+- In practice, Windows packages should be built on Windows, and Linux packages should be built on Linux. For your eventual RHEL 8 target, plan to run the Linux packaging step on a Linux build machine or CI runner.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## RHEL 8 AppImage Docker Build
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+To build a Linux AppImage in a RHEL 8-compatible container and extract the result directly into a local `release-linux/` folder:
+
+```bash
+docker build --output ./release-linux -f Dockerfile.rhel8-appimage .
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+This uses a UBI 8 Node 20 base image, runs the Electron Linux AppImage build, and exports the generated `.AppImage` artifact from the final image stage into `release-linux/`.
